@@ -1,0 +1,16 @@
+Hello
+
+You have received this email because you have requested the
+reset of your Jabber/XMPP account password.
+
+To proceed with the password change, use the following link:
+
+Account ID:	{jid}
+Reset Link:	{url}
+
+If you have not requested to reset your password, ignore this message.
+The link expires in {time}h.
+
+Sincerely, the team of {host}
+
+

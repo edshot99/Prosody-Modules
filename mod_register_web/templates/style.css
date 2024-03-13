@@ -33,19 +33,19 @@ p, h1, form, button {
 
 /* ----------- stylized ----------- */
 #estilo {
-    border:solid 2px #b7ddf2;
-    background:#ebf4fb;
+    border:solid 2px #f2ddb7;
+    background:#fbf4eb;
 }
 
 #estilo2 {
-    border-left:solid 2px #b7ddf2;
-    border-right:solid 2px #b7ddf2;
-    background:#ebf4fb;
+    border-left:solid 2px #f2ddb7;
+    border-right:solid 2px #f2ddb7;
+    background:#fbf4eb;
 }
 
 #estilo3 {
-    border:solid 2px #b7ddf2;
-    background:#ebf4fb;
+    border:solid 2px #f2ddb7;
+    background:#fbf4eb;
 }
 
 #estilo h1 {
@@ -58,7 +58,7 @@ p, h1, form, button {
     font-size:11px;
     color:#666666;
     margin-bottom:20px;
-    border-bottom:solid 1px #b7ddf2;
+    border-bottom:solid 1px #f2ddb7;
     padding-bottom:10px;
 }
 
@@ -67,7 +67,7 @@ p, h1, form, button {
     font-weight:bold;
     color:red;
     margin-bottom:20px;
-    border-bottom:solid 1px #b7ddf2;
+    border-bottom:solid 1px #f2ddb7;
     padding-bottom:10px;
     text-align:center;
 }
@@ -93,9 +93,13 @@ p, h1, form, button {
     /* float:left; */
     font-size:12px;
     padding:4px 2px;
-    border:solid 1px #aacfe4;
+    border:solid 1px #e4cfaa;
     width:200px;
     margin:2px 0 20px 10px;
+}
+
+#estilo th {
+    padding-bottom:18px;
 }
 
 #estilo2 div {
@@ -117,10 +121,10 @@ p, h1, form, button {
 }
 
 .button {
-    -moz-box-shadow:inset 0px 1px 0px 0px #cae3fc;
-    -webkit-box-shadow:inset 0px 1px 0px 0px #cae3fc;
-    box-shadow:inset 0px 1px 0px 0px #cae3fc;
-    background-color:#79bbff;
+    -moz-box-shadow:inset 0px 1px 0px 0px #fce3ca;
+    -webkit-box-shadow:inset 0px 1px 0px 0px #fce3ca;
+    box-shadow:inset 0px 1px 0px 0px #fce3ca;
+    background-color:#ffbb79;
     -webkit-border-top-left-radius:18px;
     -moz-border-radius-topleft:18px;
     border-top-left-radius:18px;
@@ -134,7 +138,7 @@ p, h1, form, button {
     -moz-border-radius-bottomleft:18px;
     border-bottom-left-radius:18px;
     text-indent:0;
-    border:1px solid #469df5;
+    border:1px solid #f59d46;
     display:inline-block;
     color:#ffffff;
     font-family:Arial;
@@ -146,11 +150,11 @@ p, h1, form, button {
     width:100px;
     text-decoration:none;
     text-align:center;
-    text-shadow:1px 1px 0px #287ace;
+    text-shadow:1px 1px 0px #ce7a28;
 }
 
 .button:hover {
-    background-color:#4197ee;
+    background-color:#ee9741;
 }
 
 .button:active {

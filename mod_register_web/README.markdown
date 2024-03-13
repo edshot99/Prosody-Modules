@@ -19,27 +19,35 @@ Details
 -------
 
 mod\_register\_web has Prosody serve a web page where users can sign up
-for an account. It implements reCAPTCHA to prevent automated sign-ups
-(from bots, etc.).
+for an account. It implements a CAPTCHA system to prevent automated
+sign-ups (from bots, etc.).
 
 Configuration
 -------------
 
 The module is served on Prosody's default HTTP ports at the path
 `/register_web`. More details on configuring HTTP modules in Prosody can
-be found in our [HTTP documentation](http://prosody.im/doc/http).
+be found in our [HTTP documentation](https://prosody.im/doc/http).
 
 To configure the CAPTCHA you need to supply a 'captcha\_options' option:
 
         captcha_options = {
-          recaptcha_private_key = "12345";
-          recaptcha_public_key = "78901";
+          -- provider = "recaptcha";
+          -- recaptcha_private_key = "12345";
+          -- recaptcha_public_key = "78901";
+
+          -- provider = "hcaptcha";
+          -- hcaptcha_private_key = "12345";
+          -- hcaptcha_public_key = " 78901";
+
+          ---- Default if no reCaptcha or hCaptcha options are set
+          -- provider = "simplecaptcha";
         }
 
-The keys for reCAPTCHA are available in your reCAPTCHA account, visit
-[reCAPTCHA](https://developers.google.com/recaptcha/) for more info.
+To only allow registration through this module, enter in the following
+to your configuration:
 
-If no reCaptcha options are set, a simple built in captcha is used.
+registration_web_only = true
 
 Customization
 -------------
@@ -52,6 +60,7 @@ Compatibility
 -------------
 
   ----- --------------
+  0.12  Works
   0.10  Works
   0.9   Works
   0.8   Doesn't work

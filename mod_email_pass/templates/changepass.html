@@ -1,35 +1,49 @@
 <!DOCTYPE html>
 <html>
   <head>
-  <meta charset="utf-8">
-  <link rel="stylesheet" type="text/css" href="style.css" />
-  <title>Reseteo de la clave de tu cuenta Jabber</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=0.7" />
+    <title>{s_title}</title>
   </head>
   <body>
+    <div id="estilo3" class="formulario">
+      <h1>{s_title}</h1>
+    </div>
+    <div id="estilo2" class="formulario2">
+      <div>
+        <form action="{path}" method="POST">
+          <input name="lang" type="submit" value="English">
+          <input name="lang" type="submit" value="Español">
+          <input name="langchange" type="hidden" value="true">
+        </form>
+      </div>
+    </div>
     <div id="estilo" class="formulario">
-      <h1>Reseteo de la clave de tu cuenta Jabber</h1>
       <form action="{path}" method="POST">
 		<p class="error">{notice}</p>
 		<label>
-		Usuario:
-		<span class="small">Introduce tu usuario</span>
+		{s_username}:
+		<span class="small">{s_usernamemessage}</span>
 		</label>
 		<input type="text" name="username" required>@{hostname}
 		<div class="spacer"></div>
 		<label>
-		Email:
-		<span class="small">Introduce tu email</span>
+		{s_email}:
+		<span class="small">{s_emailmessage}</span>
 		</label>
 		<input type="text" name="email" required>
 		<div class="spacer"></div>
 
-		<input id="button" class="button" type="submit" value="Enviar!">
+		<input name="lang" type="hidden" value="{s_lang}">
+		<input name="langchange" type="hidden" value="false">
+		<input id="button" class="button" type="submit" value="{s_send}">
 		<div class="spacer"></div>
       </form>
       <p>
-      Al pulsar sobre el bot&oacute;n, se enviar&aacute; a la direcci&oacute;n de correo que figura
-      en tu vCard un enlace en el que deber&aacute;s entrar.<br />
+      {s_text}
       </p>
+      <br />
     </div>
   </body>
 </html>

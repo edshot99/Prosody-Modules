@@ -25,8 +25,8 @@ function template(data)
 	return { apply = function(values) return (data:gsub("{([^}]+)}", values)); end }
 end
 
-local function get_template(name)
-	local fh = assert(module:load_resource(template_path..path_sep..name..".html"));
+local function get_template(name, extension)
+	local fh = assert(module:load_resource(template_path..path_sep..name..extension));
 	local data = assert(fh:read("*a"));
 	fh:close();
 	return template(data);
@@ -36,15 +36,30 @@ local function render(template, data)
 	return tostring(template.apply(data));
 end
 
-local register_tpl = get_template "register";
-local success_tpl = get_template "success";
+local register_tpl = get_template("register", ".html");
+local success_tpl = get_template("success", ".html");
+
+local web_verified;
+local web_only = module:get_option_boolean("registration_web_only", false);
+if web_only then
+	-- from mod_invites_register.lua
+	module:hook("user-registering", function (event)
+		local web_verified = event.web_verified;
+
+		if not web_verified then
+			event.allowed = false;
+			event.reason = "Registration on this server is through website only";
+			return;
+		end
+	end);
+end
 
 -- COMPAT `or request.conn:ip()`
 
 if next(captcha_options) ~= nil then
 	local provider = captcha_options.provider;
 	if provider == nil or provider == "recaptcha" then
-		local recaptcha_tpl = get_template "recaptcha";
+		local recaptcha_tpl = get_template("recaptcha", ".html");
 
 		function generate_captcha(display_options)
 			return recaptcha_tpl.apply(setmetatable({
@@ -77,7 +92,7 @@ if next(captcha_options) ~= nil then
 			end);
 		end
 	elseif provider == "hcaptcha" then
-		local captcha_tpl = get_template "hcaptcha";
+		local captcha_tpl = get_template("hcaptcha", ".html");
 
 		function generate_captcha(display_options)
 			return captcha_tpl.apply(setmetatable({
@@ -93,7 +108,7 @@ if next(captcha_options) ~= nil then
 		function verify_captcha(request, form, callback)
 			http.request("https://hcaptcha.com/siteverify", {
 				body = http.formencode {
-					secret = captcha_options.captcha_private_key;
+					secret = captcha_options.hcaptcha_private_key;
 					remoteip = request.ip or request.conn:ip();
 					response = form["h-captcha-response"];
 				};
@@ -116,8 +131,16 @@ else
 	local hmac_sha1 = require "util.hashes".hmac_sha1;
 	local secret = require "util.uuid".generate()
 	local ops = { '+', '-' };
-	local captcha_tpl = get_template "simplecaptcha";
-	function generate_captcha()
+	local captcha_tpl = get_template("simplecaptcha", ".html");
+	function generate_captcha(display_options, lang)
+		-- begin translation
+		if lang == "Español" then
+			s_question = "¿Qué es";
+		else
+			s_question = "What is";
+		end
+		-- end translation
+
 		local op = ops[random(1, #ops)];
 		local x, y = random(1, 9)
 		repeat
@@ -135,53 +158,113 @@ else
 		end
 		local challenge = hmac_sha1(secret, answer, true);
 		return captcha_tpl.apply {
-			op = op, x = x, y = y, challenge = challenge;
+			op = op, x = x, y = y, challenge = challenge, s_question = s_question;
 		};
 	end
 	function verify_captcha(request, form, callback)
 		if hmac_sha1(secret, form.captcha_reply or "", true) == form.captcha_challenge then
 			callback(true);
 		else
-			callback(false, "Captcha verification failed");
+			-- begin translation
+			if form.lang == "Español" then
+				callback(false, "Verificación de Captcha fallida");
+			else
+				callback(false, "Captcha verification failed");
+			end
+			-- end translation
 		end
 	end
 end
 
-function generate_page(event, display_options)
+function generate_page(event, lang, display_options)
 	local request, response = event.request, event.response;
+
+	-- begin translation
+	if lang == "Español" then
+		s_title = "Registro de cuenta XMPP";
+		s_username = "Nombre de Usuario";
+		s_password = "Contraseña";
+		s_passwordconfirm = "Contraseña Confirmación";
+		s_register = "¡Registro!";
+	else
+		s_title = "XMPP Account Registration";
+		s_username = "Username";
+		s_password = "Password";
+		s_passwordconfirm = "Confirm Password";
+		s_register = "Register!";
+	end
+	-- end translation
 
 	response.headers.content_type = "text/html; charset=utf-8";
 	return render(register_tpl, {
 		path = request.path; hostname = module.host;
 		notice = display_options and display_options.register_error or "";
-		captcha = generate_captcha(display_options);
-	})
+		captcha = generate_captcha(display_options, lang);
+		s_title = s_title;
+		s_username = s_username;
+		s_password = s_password;
+		s_passwordconfirm = s_passwordconfirm;
+		s_register = s_register;
+		s_lang = lang;
+	});
 end
 
 function register_user(form, origin)
+	local lang = form.lang;
 	local username = form.username;
 	local password = form.password;
 	local confirm_password = form.confirm_password;
 	local jid = nil;
-	form.username, form.password, form.confirm_password = nil, nil, nil;
+	form.password, form.confirm_password = nil, nil;
 
 	local prepped_username = nodeprep(username, true);
 	if not prepped_username then
-		return nil, "Username contains forbidden characters";
+		-- begin translation
+		if lang == "Español" then
+			return nil, "Nombre de usuario contiene caracteres prohibidos";
+		else
+			return nil, "Username contains forbidden characters";
+		end
+		-- end translation
 	end
 	if #prepped_username == 0 then
-		return nil, "The username field was empty";
+		-- begin translation
+		if lang == "Español" then
+			return nil, "El campo texto de nombre de usuario estaba vacío";
+		else
+			return nil, "The username field was empty";
+		end
+		-- end translation
 	end
 	if usermanager.user_exists(prepped_username, module.host) then
-		return nil, "Username already taken";
+		-- begin translation
+		if lang == "Español" then
+			return nil, "Nombre de usuario ya ocupado";
+		else
+			return nil, "Username already taken";
+		end
+		-- end translation
 	end
-	local registering = { username = prepped_username , host = module.host, additional = form, ip = origin.ip or origin.conn:ip(), allowed = true }
+
+	local registering = { username = prepped_username , host = module.host, additional = form, ip = origin.ip or origin.conn:ip(), allowed = true, web_verified = true }
 	module:fire_event("user-registering", registering);
 	if not registering.allowed then
-		return nil, registering.reason or "Registration not allowed";
+		-- begin translation
+		if lang == "Español" then
+			return nil, registering.reason or "Registro no permitido";
+		else
+			return nil, registering.reason or "Registration not allowed";
+		end
+		-- end translation
 	end
 	if confirm_password ~= password then
-		return nil, "Passwords don't match";
+		-- begin translation
+		if lang == "Español" then
+			return nil, "Las contraseñas no igualar";
+		else
+			return nil, "Passwords don't match";
+		end
+		-- end translation
 	end
 	local ok, err = usermanager.create_user(prepped_username, password, module.host);
 	if ok then
@@ -202,20 +285,41 @@ function register_user(form, origin)
 			source = module.name,
 			ip = origin.ip or origin.conn:ip(),
 		});
+		module:log("info", "New Account Registered: %s#%s@%s", prepped_username, origin.ip, module.host);
 	end
+
 	return jid, err;
 end
 
-function generate_success(event, jid)
-	return render(success_tpl, { jid = jid });
+function generate_success(event, jid, lang)
+	local request, response = event.request, event.response;
+
+	-- begin translation
+	if lang == "Español" then
+		s_title = "¡Registro exitoso!";
+		s_message = "Tu cuenta es";
+	else
+		s_title = "Registration succeeded!";
+		s_message = "Your account is";
+	end
+	-- end translation
+
+	response.headers.content_type = "text/html; charset=utf-8";
+	return render(success_tpl, {
+		path = request.path;
+		jid = jid;
+		lang = lang;
+		s_title = s_title;
+		s_message = s_message;
+	});
 end
 
-function generate_register_response(event, jid, err)
+function generate_register_response(event, jid, lang, err)
 	event.response.headers.content_type = "text/html; charset=utf-8";
 	if jid then
-		return generate_success(event, jid);
+		return generate_success(event, jid, lang);
 	else
-		return generate_page(event, { register_error = err });
+		return generate_page(event, lang, { register_error = err });
 	end
 end
 
@@ -225,9 +329,9 @@ function handle_form(event)
 	verify_captcha(request, form, function (ok, err)
 		if ok then
 			local jid, register_err = register_user(form, request);
-			response:send(generate_register_response(event, jid, register_err));
+			response:send(generate_register_response(event, jid, form.lang, register_err));
 		else
-			response:send(generate_page(event, { register_error = err }));
+			response:send(generate_page(event, form.lang, { register_error = err }));
 		end
 	end);
 	return true; -- Leave connection open until we respond above
@@ -236,6 +340,7 @@ end
 module:provides("http", {
 	title = module:get_option_string("register_web_title", "Account Registration");
 	route = {
+		["GET /style.css"] = render(get_template("style", ".css"), {});
 		GET = generate_page;
 		["GET /"] = generate_page;
 		POST = handle_form;

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=0.7" />
+    <title>{s_title}</title>
+  </head>
+  <body>
+      <div id="estilo3" class="formulario">
+        <h1>{s_title}</h1>
+      </div>
+      <div id="estilo2" class="formulario2">
+        <div>
+          <form action="{path}" method="POST">
+            <input name="lang" type="submit" value="English">
+            <input name="lang" type="submit" value="Español">
+            <input name="langchange" type="hidden" value="true">
+          </form>
+        </div>
+      </div>
+      <div id="estilo" class="formulario">
+        <form action="{path}" method="POST">
+		<p class="error">{notice}</p>
+		<label>
+		{s_username}:
+		<span class="small">{s_usernamemessage}</span>
+		</label>
+		<input type="text" name="username" required>@{hostname}
+		<div class="spacer"></div>
+		<label>
+		{s_password}:
+		<span class="small">{s_passwordmessage}</span>
+		</label>
+		<input type="password" name="password" required>
+		<div class="spacer"></div>
+		<label>
+		{s_email}:
+		<span class="small">{s_emailmessage}</span>
+		</label>
+		<input type="text" name="email">
+		<div class="spacer"></div>
+
+		<input name="lang" type="hidden" value="{s_lang}">
+		<input name="langchange" type="hidden" value="false">
+		<input id="button" class="button" type="submit" value="{s_change}">
+		<div class="spacer"></div>
+      </form>
+    </div>
+  </body>
+</html>
+
